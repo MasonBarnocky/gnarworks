@@ -1,0 +1,28 @@
+# Gnarworks Radar config. Edit freely; subreddits that don't exist are skipped with a warning.
+
+[settings]
+lookback_hours = 24      # only look at posts newer than this
+min_fit = 6              # only show posts scored at least this (0-10)
+max_ai_posts = 40        # cap on posts sent to the AI per run (cost control)
+voice = """Casual and direct, like a 21-year-old builder in Bozeman who works facility ops and runs his own small Google Ads campaigns.
+Short sentences. No marketing speak, no hype words, no emojis, no em dashes. Give real, specific advice first."""
+
+[[products]]
+name = "Waste Finder"
+link = "https://gnarworks.vercel.app/wastefinder"
+pitch = "Free browser tool: upload a Google Ads search terms report, see how much was wasted on junk searches (freebie seekers, job seekers, wrong industries), get a negative keyword list. File never leaves the browser."
+keywords = ["search terms report", "search term report", "negative keyword", "negative keywords", "wasted spend",
+            "wasting money on google ads", "irrelevant searches", "irrelevant clicks", "junk clicks",
+            "google ads not converting", "google ads waste", "broad match"]
+subreddits = ["googleads", "PPC", "smallbusiness", "marketing", "SaaS", "Entrepreneur"]
+search_all_reddit = false
+
+[[products]]
+name = "CheckPunch"
+link = "https://checkpunch.app"
+pitch = "Shift checklists with photo proof for single-location gyms, studios and small businesses. Staff run open/close/shift checklists on a phone or front-desk tablet; managers see what got skipped. $40/mo, free trial. NOT a time clock."
+keywords = ["closing checklist", "opening checklist", "opening and closing", "closing duties", "opening duties",
+            "cleaning checklist", "side work", "closing shift", "staff not cleaning", "employees not cleaning",
+            "checklist app", "task checklist", "shift checklist", "accountability for staff", "employee accountability"]
+subreddits = ["gymowners", "smallbusiness", "managers", "personaltraining", "Entrepreneur"]
+search_all_reddit = false
