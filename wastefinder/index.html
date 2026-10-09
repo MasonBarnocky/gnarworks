@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waste Finder by Gnarworks — find wasted Google Ads spend</title>
+<meta name="description" content="Upload your Google Ads search terms report. See how much you wasted and get a ready-to-paste negative keyword list. Free, and your file never leaves your browser.">
+<style>
+:root{
+  --bg:#f7f7f5;--card:#fff;--ink:#16181d;--muted:#666b75;--line:#e4e4e0;
+  --accent:#1f6feb;--bad:#d1242f;--bad-bg:#fdecec;--warn:#9a6700;--warn-bg:#fff4d6;--ok:#1a7f37;--ok-bg:#e6f4ea;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1115;--card:#171a20;--ink:#e8eaed;--muted:#9aa0aa;--line:#2a2e36;
+  --accent:#4c8dff;--bad:#ff6b6b;--bad-bg:#3a1d1f;--warn:#e3b341;--warn-bg:#33290f;--ok:#4cc277;--ok-bg:#16301f;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0 0 12px;letter-spacing:-.02em}
+h2{font-size:20px;margin:0 0 12px}
+.sub{color:var(--muted);font-size:18px;margin:0 0 28px;max-width:640px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:36px 16px;text-align:center;cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.drop strong{display:block;font-size:18px;margin-bottom:4px}
+.muted{color:var(--muted)}.small{font-size:14px}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 4px}
+input[type=text],input[type=email]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--accent);color:#fff}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;margin-top:14px}
+.big{font-size:clamp(40px,9vw,64px);font-weight:800;letter-spacing:-.03em;color:var(--bad);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat b{display:block;font-size:22px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.num,th.num{text-align:right;white-space:nowrap}
+.tbl{overflow-x:auto}
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:700}
+.block{background:var(--bad-bg);color:var(--bad)}.watch{background:var(--warn-bg);color:var(--warn)}.keep{background:var(--ok-bg);color:var(--ok)}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;white-space:pre-wrap;font-size:14px;margin:12px 0 0}
+.pro{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--card))}
+.pro form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pro input{flex:1;min-width:200px}
+.err{color:var(--bad);font-weight:600;margin-top:12px}
+.steps{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px}
+.hidden{display:none}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>How much of your Google Ads budget is going to junk searches?</h1>
+  <p class="sub">Upload your search terms report. In 5 seconds you'll see what you wasted and get a ready-to-paste negative keyword list. Free. Your file never leaves your browser.</p>
+
+  <div class="card" id="inputCard">
+    <div class="drop" id="drop">
+      <strong>Drop your Search terms report here</strong>
+      <span class="muted small">or click to choose a .csv file</span>
+      <input type="file" id="file" accept=".csv,.tsv,.txt" hidden>
+    </div>
+    <details>
+      <summary>How do I get this file?</summary>
+      <ol class="steps">
+        <li>In Google Ads, open <b>Campaigns → Insights and reports → Search terms</b>.</li>
+        <li>Set the date range to the last 30 days (more data = better results).</li>
+        <li>Click the <b>download</b> icon and choose <b>.csv</b>.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>Make it smarter (optional)</summary>
+      <label for="core">What you sell: key words (comma separated)</label>
+      <input type="text" id="core" placeholder="e.g. checklist app, gym, studio, software">
+      <label for="off">Industries or people you DON'T serve</label>
+      <input type="text" id="off" placeholder="e.g. restaurant, hotel, nurse, construction">
+      <p class="muted small">We never suggest blocking a word that appears in a search that converted, or in your key words.</p>
+    </details>
+    <div class="err hidden" id="err"></div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="card">
+      <div class="muted small" id="range"></div>
+      <div class="big" id="wasted">$0</div>
+      <div id="wastedSub" style="margin-top:6px"></div>
+      <div class="stats">
+        <div class="stat"><span class="muted small">Total spend</span><b id="sSpend"></b></div>
+        <div class="stat"><span class="muted small">Junk searches</span><b id="sJunk"></b></div>
+        <div class="stat"><span class="muted small">Projected waste / month</span><b id="sMonth"></b></div>
+        <div class="stat"><span class="muted small">Conversions</span><b id="sConv"></b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Block these words</h2>
+      <p class="muted small" style="margin:0">Uncheck anything you want to keep. Then paste into <b>Google Ads → Keywords → Negative keywords</b> (phrase match).</p>
+      <div class="tbl" style="margin-top:12px"><table id="negTable"></table></div>
+      <pre id="negText"></pre>
+      <div class="row-actions">
+        <button id="copyBtn">Copy list</button>
+        <button class="ghost" id="dlBtn">Download for Ads Editor (.csv)</button>
+      </div>
+    </div>
+
+    <div class="card pro">
+      <h2>Want this to run every week, automatically?</h2>
+      <p style="margin:0">Waste Finder Pro connects to your Google Ads, catches new junk searches as they appear, and blocks them for you in one click. <b>$19/month.</b> Join the waitlist for early access and a founder discount.</p>
+      <form id="wl">
+        <input type="email" id="wlEmail" required placeholder="you@business.com">
+        <button type="submit">Join waitlist</button>
+      </form>
+      <div class="small" id="wlMsg" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Every search, scored</h2>
+      <div class="tbl"><table id="termTable"></table></div>
+    </div>
+
+    <div style="text-align:center"><button class="ghost" id="again">Analyze another report</button></div>
+  </div>
+
+  <footer>Waste Finder by <a href="/" style="color:inherit">Gnarworks</a> · Built by a solo founder who was wasting his own ad budget.</footer>
+</div>
+
+<script>
+// ===== config: paste your Supabase project URL + anon key to collect waitlist emails =====
+const SUPABASE_URL = "";        // e.g. "https://abcd1234.supabase.co"
+const SUPABASE_ANON_KEY = "";
+
+// ===== rules =====
+const UNIVERSAL = {
+  freebie: ["free","template","templates","pdf","printable","sample","example","examples","download","word doc","diy","excel","google sheets","worksheet"],
+  job: ["job","jobs","salary","hiring","career","careers","resume","internship","indeed","pay rate","job description"],
+  research: ["what is","meaning","definition","define","how to","reddit","wikipedia","course","certification","class","quizlet"],
+};
+const STOP = new Set("a an the and or for of to in on with my your near me best top vs".split(" "));
+const REASON = {freebie:"wants something free", job:"job seeker", research:"just researching", "off-market":"not your market"};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = n => "$" + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = s => { const v = parseFloat(String(s ?? "").replace(/[,%$\s]/g,"").replace(/[^\d.\-]/g,"")); return isNaN(v) ? 0 : v; };
+const listFrom = s => s.split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+const toks = s => (s.toLowerCase().match(/[a-z0-9]+/g) || []);
+const hasPhrase = (term, p) => new RegExp("(?<![a-z])" + p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "(?![a-z])").test(term.toLowerCase());
+
+// ===== parsing (handles Google's CSV and the UTF-16 "Excel CSV" export) =====
+function decode(buf){
+  const b = new Uint8Array(buf);
+  if (b[0]===0xFF && b[1]===0xFE) return new TextDecoder("utf-16le").decode(buf);
+  if (b[0]===0xFE && b[1]===0xFF) return new TextDecoder("utf-16be").decode(buf);
+  return new TextDecoder("utf-8").decode(buf).replace(/^﻿/,"");
+}
+function splitRow(line, d){
+  const out=[]; let cur="", q=false;
+  for (let i=0;i<line.length;i++){
+    const c=line[i];
+    if (q){ if (c==='"'){ if (line[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else if (c==='"') q=true; else if (c===d){out.push(cur);cur="";} else cur+=c;
+  }
+  out.push(cur); return out;
+}
+function parseReport(text){
+  const lines = text.split(/\r?\n/);
+  const start = lines.findIndex(l => /^"?Search term"?[,\t]/.test(l));
+  if (start < 0) throw new Error("This doesn't look like a Search terms report. Make sure you downloaded it from Insights and reports → Search terms.");
+  const d = lines[start].includes("\t") ? "\t" : ",";
+  const head = splitRow(lines[start], d).map(h => h.trim());
+  const col = name => head.findIndex(h => h.toLowerCase() === name.toLowerCase());
+  const ci = {term:col("Search term"), clicks:col("Clicks"), impr:col("Impr."), cost:col("Cost"), conv:col("Conversions")};
+  if (ci.cost < 0) throw new Error("Couldn't find a Cost column. Add the Cost column in Google Ads before downloading.");
+  let range = "";
+  for (const l of lines.slice(0,start)) { const m = l.replace(/"/g,"").trim(); if (/\d{4}/.test(m)) range = m; }
+  const rows=[];
+  for (const l of lines.slice(start+1)){
+    if (!l.trim()) continue;
+    const r = splitRow(l, d), term = (r[ci.term]||"").trim();
+    if (!term || term.startsWith("Total:")) continue;
+    rows.push({term, clicks:num(r[ci.clicks]), impr:num(r[ci.impr]), cost:num(r[ci.cost]), conv: ci.conv>=0 ? num(r[ci.conv]) : 0});
+  }
+  return {rows, range};
+}
+function rangeDays(range){
+  const parts = range.split(/\s+-\s+/).map(s => new Date(s));
+  if (parts.length===2 && !isNaN(parts[0]) && !isNaN(parts[1])) return Math.max(1, Math.round((parts[1]-parts[0])/864e5)+1);
+  return null;
+}
+
+// ===== scoring =====
+function analyze(rows, cfg){
+  for (const r of rows){
+    const flags=[];
+    for (const [cat, words] of Object.entries(UNIVERSAL)) for (const w of words) if (hasPhrase(r.term,w)) flags.push([cat,w]);
+    for (const w of cfg.off) if (hasPhrase(r.term,w)) flags.push(["off-market",w]);
+    const t = new Set(toks(r.term));
+    const overlap = cfg.core.filter(c => c.split(/\s+/).every(x => t.has(x))).length;
+    const cats = new Set(flags.map(f=>f[0]));
+    let penalty = 0;
+    for (const c of cats) penalty += (c==="off-market"||c==="job") ? 50 : 35;
+    let score = Math.max(0, Math.min(100, 50 + 15*Math.min(overlap,2) - penalty));
+    r.score = score;
+    r.reason = flags.length ? [...cats].map(c => REASON[c]).join(", ") + " (“" + flags[0][1] + "”)" : (overlap ? "matches what you sell" : "");
+    r.neg = flags.length ? flags[0][1] : null;
+    r.verdict = r.conv > 0 ? "keep" : score < 35 ? "block" : score < 55 && r.cost > 0 && r.clicks >= 3 ? "watch" : "keep";
+    if (r.conv > 0) r.reason = "converted — protected";
+  }
+  // protected words: anything in a converting search + your core words
+  const protectedW = new Set();
+  rows.filter(r=>r.conv>0).forEach(r => toks(r.term).forEach(w=>protectedW.add(w)));
+  cfg.core.forEach(c => c.split(/\s+/).forEach(w=>protectedW.add(w)));
+  const safe = n => !n.split(/\s+/).some(w => protectedW.has(w));
+
+  const negs = new Map();
+  for (const r of rows) if (r.verdict==="block" && r.neg && safe(r.neg)){
+    const n = r.neg.toLowerCase(); if (!negs.has(n)) negs.set(n,{cost:0,terms:[]});
+    negs.get(n).cost += r.cost; negs.get(n).terms.push(r.term);
+  }
+  // n-gram mining: words that spend across 2+ searches, never convert, ~all spend already junk
+  const stats = new Map();
+  for (const r of rows){
+    const tk = toks(r.term);
+    const grams = new Set([...tk.filter(x=>!STOP.has(x)), ...tk.slice(1).map((x,i)=>tk[i]+" "+x)]);
+    for (const g of grams){ const s = stats.get(g) || {cost:0,terms:0,conv:0}; s.cost+=r.cost; s.terms++; s.conv+=r.conv; stats.set(g,s); }
+  }
+  [...stats].filter(([g,s]) => s.conv===0 && s.cost>=1 && s.terms>=2).sort((a,b)=>b[1].cost-a[1].cost).forEach(([g,s])=>{
+    if (negs.has(g) || !safe(g)) return;
+    const hits = rows.filter(r => hasPhrase(r.term,g));
+    if (hits.every(r => [...negs.keys()].some(n => hasPhrase(r.term,n)))) return;
+    const bad = hits.filter(r=>r.verdict==="block").reduce((a,r)=>a+r.cost,0);
+    if (s.cost && bad/s.cost >= 0.9) negs.set(g,{cost:s.cost, terms:hits.map(r=>r.term)});
+  });
+  return [...negs].sort((a,b)=>b[1].cost-a[1].cost);
+}
+
+// ===== render =====
+let current = null;
+function render({rows, range}, negs){
+  const total = rows.reduce((a,r)=>a+r.cost,0);
+  const blocked = rows.filter(r=>r.verdict==="block");
+  const wasted = blocked.reduce((a,r)=>a+r.cost,0);
+  const conv = rows.reduce((a,r)=>a+r.conv,0);
+  const days = rangeDays(range);
+  $("range").textContent = (range ? range + " · " : "") + rows.length + " search terms";
+  $("wasted").textContent = money(wasted) + " wasted";
+  $("wastedSub").textContent = total ? `${Math.round(wasted/total*100)}% of your spend went to searches that were never going to buy.` : "No spend yet — but here's what to block before it starts costing you.";
+  $("sSpend").textContent = money(total);
+  $("sJunk").textContent = `${blocked.length} of ${rows.length}`;
+  $("sMonth").textContent = days ? money(wasted/days*30) : "—";
+  $("sConv").textContent = conv.toLocaleString();
+
+  $("negTable").innerHTML = negs.length
+    ? `<tr><th></th><th>Negative keyword</th><th class="num">Wasted on it</th><th>Example search</th></tr>` +
+      negs.map(([n,d],i)=>`<tr><td><input type="checkbox" data-i="${i}" checked></td><td><b>${esc(n)}</b></td><td class="num">${money(d.cost)}</td><td class="muted">${esc(d.terms[0])}${d.terms.length>1?` <span class="small">+${d.terms.length-1} more</span>`:""}</td></tr>`).join("")
+    : `<tr><td class="muted">Nothing to block — nice. Check back as you get more traffic.</td></tr>`;
+  $("negTable").onchange = updateNegText;
+  current = {negs};
+  updateNegText();
+
+  const order = {block:0, watch:1, keep:2};
+  $("termTable").innerHTML = `<tr><th></th><th>Search</th><th class="num">Clicks</th><th class="num">Cost</th><th>Why</th></tr>` +
+    [...rows].sort((a,b)=>order[a.verdict]-order[b.verdict] || b.cost-a.cost).map(r =>
+      `<tr><td><span class="chip ${r.verdict}">${r.verdict}</span></td><td>${esc(r.term)}</td><td class="num">${r.clicks}</td><td class="num">${money(r.cost)}</td><td class="muted small">${esc(r.reason)}</td></tr>`).join("");
+
+  $("inputCard").classList.add("hidden");
+  $("results").classList.remove("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function selectedNegs(){
+  const boxes = [...document.querySelectorAll('#negTable input[type=checkbox]')];
+  return current.negs.filter((_,i) => !boxes[i] || boxes[i].checked).map(([n])=>n);
+}
+function updateNegText(){ const s = selectedNegs(); $("negText").textContent = s.length ? s.join("\n") : "(none selected)"; }
+
+$("copyBtn").onclick = async () => {
+  const txt = selectedNegs().join("\n");
+  try { await navigator.clipboard.writeText(txt); } catch { const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  $("copyBtn").textContent = "Copied ✓"; setTimeout(()=>$("copyBtn").textContent="Copy list", 1500);
+};
+$("dlBtn").onclick = () => {
+  const csv = "Keyword,Criterion Type\n" + selectedNegs().map(n => `"${n.replace(/"/g,'""')}",Negative Phrase`).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = "negative-keywords.csv"; a.click();
+};
+$("again").onclick = () => { $("results").classList.add("hidden"); $("inputCard").classList.remove("hidden"); $("file").value=""; };
+
+// ===== file handling =====
+function handle(file){
+  $("err").classList.add("hidden");
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const parsed = parseReport(decode(fr.result));
+      if (!parsed.rows.length) throw new Error("The report has no search terms in it. Try a longer date range.");
+      const cfg = {core: listFrom($("core").value), off: listFrom($("off").value)};
+      render(parsed, analyze(parsed.rows, cfg));
+    } catch (e) { $("err").textContent = e.message; $("err").classList.remove("hidden"); }
+  };
+  fr.readAsArrayBuffer(file);
+}
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+$("file").onchange = e => e.target.files[0] && handle(e.target.files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); };
+
+// ===== waitlist =====
+$("wl").onsubmit = async e => {
+  e.preventDefault();
+  const email = $("wlEmail").value.trim();
+  const wasted = $("wasted").textContent;
+  try {
+    if (SUPABASE_URL) {
+      const res = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {
+        method:"POST",
+        headers:{apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json", Prefer:"return=minimal"},
+        body: JSON.stringify({email, wasted_label: wasted, source: location.hostname})
+      });
+      if (!res.ok) throw new Error();
+    } else console.log("waitlist (no backend configured):", email, wasted);
+    $("wlMsg").textContent = "You're on the list. I'll email you when Pro is ready.";
+    $("wl").classList.add("hidden");
+  } catch { $("wlMsg").textContent = "Something went wrong — try again in a sec."; }
+};
+</script>
+</body>
+</html>
