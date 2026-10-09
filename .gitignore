@@ -1,0 +1,5 @@
+.env
+*.db
+radar/out/
+radar/radar.log
+__pycache__/
