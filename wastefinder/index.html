@@ -107,12 +107,9 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:40px}
 
     <div class="card pro">
       <h2>Want this to run every week, automatically?</h2>
-      <p style="margin:0">Waste Finder Pro connects to your Google Ads, catches new junk searches as they appear, and blocks them for you in one click. <b>$19/month.</b> Join the waitlist for early access and a founder discount.</p>
-      <form id="wl">
-        <input type="email" id="wlEmail" required placeholder="you@business.com">
-        <button type="submit">Join waitlist</button>
-      </form>
-      <div class="small" id="wlMsg" style="margin-top:8px"></div>
+      <p style="margin:0">Waste Finder Pro connects to your Google Ads, catches new junk searches as they appear, and blocks them for you in one click. <b>$19/month.</b> Want early access and a founder discount?</p>
+      <div class="row-actions"><button id="proBtn">Email me about Pro</button></div>
+      <div class="small muted" style="margin-top:8px">Opens a pre-filled email. One click, no signup.</div>
     </div>
 
     <div class="card">
@@ -127,10 +124,6 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:40px}
 </div>
 
 <script>
-// ===== config: paste your Supabase project URL + anon key to collect waitlist emails =====
-const SUPABASE_URL = "";        // e.g. "https://abcd1234.supabase.co"
-const SUPABASE_ANON_KEY = "";
-
 // ===== rules =====
 const UNIVERSAL = {
   freebie: ["free","template","templates","pdf","printable","sample","example","examples","download","word doc","diy","excel","google sheets","worksheet"],
@@ -268,6 +261,7 @@ function render({rows, range}, negs){
   $("inputCard").classList.add("hidden");
   $("results").classList.remove("hidden");
   window.scrollTo({top:0, behavior:"smooth"});
+  history.pushState({}, "", "/wastefinder/analyzed");
 }
 function selectedNegs(){
   const boxes = [...document.querySelectorAll('#negTable input[type=checkbox]')];
@@ -285,7 +279,7 @@ $("dlBtn").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = "negative-keywords.csv"; a.click();
 };
-$("again").onclick = () => { $("results").classList.add("hidden"); $("inputCard").classList.remove("hidden"); $("file").value=""; };
+$("again").onclick = () => { $("results").classList.add("hidden"); $("inputCard").classList.remove("hidden"); $("file").value=""; history.pushState({}, "", "/wastefinder"); };
 
 // ===== file handling =====
 function handle(file){
@@ -308,24 +302,15 @@ drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
 drop.ondragleave = () => drop.classList.remove("over");
 drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); };
 
-// ===== waitlist =====
-$("wl").onsubmit = async e => {
-  e.preventDefault();
-  const email = $("wlEmail").value.trim();
-  const wasted = $("wasted").textContent;
-  try {
-    if (SUPABASE_URL) {
-      const res = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {
-        method:"POST",
-        headers:{apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json", Prefer:"return=minimal"},
-        body: JSON.stringify({email, wasted_label: wasted, source: location.hostname})
-      });
-      if (!res.ok) throw new Error();
-    } else console.log("waitlist (no backend configured):", email, wasted);
-    $("wlMsg").textContent = "You're on the list. I'll email you when Pro is ready.";
-    $("wl").classList.add("hidden");
-  } catch { $("wlMsg").textContent = "Something went wrong — try again in a sec."; }
+// ===== Pro interest (mailto) =====
+$("proBtn").onclick = () => {
+  const to = ["masonbarnocky", "gmail.com"].join("@");
+  const subject = "Waste Finder Pro - early access";
+  const body = "I'd like early access to Waste Finder Pro.\n\nMy result: " + $("wasted").textContent + "\nMonthly ad spend (roughly): \nWebsite: ";
+  location.href = "mailto:" + to + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 };
 </script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
